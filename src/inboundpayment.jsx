@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
-const PaymentUpload = () => {
+const PaymentUpload = ({ amount, applicationID }) => {
   const [timer, setTimer] = useState(48 * 60 * 60); // 48 hours in seconds
+  const [file, setFile] = useState();
+  const [fileName, setFileName] = useState();
 
   useEffect(() => {
     const countdown = setInterval(() => {
@@ -18,9 +21,97 @@ const PaymentUpload = () => {
     return `${hrs}h ${mins}m ${secs}s`;
   };
 
+  /*   const uploadFile = async (row) => {
+    try {
+      const formData = new FormData();
+      console.log(file);
+      formData.append("file", file, file.name);
+      const res = await axios.post(
+        "https://content.kpdcl.net:8085/file/fileSystem",
+        formData
+      );
+      let dataSplit = res.data.split("/");
+      let fileName = dataSplit[4].split(" type")[0].split(" ").join("%20");
+      let filePath =
+        "/" + dataSplit[1] + "/" + dataSplit[2] + "/" + dataSplit[3] + "/";
+      let folderURL = await checkInDoc(fileName, filePath, row.case_id);
+      return folderURL;
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; */
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setFile(file);
+      setFileName(file.name);
+    } else {
+      setFileName("");
+    }
+  };
+
+  const uploadFile = async () => {
+    try {
+      if (!file) {
+        alert("File upload is mandatory!");
+        return;
+      }
+      const formData = new FormData();
+
+      formData.append("file", file, file.name);
+      const res = await axios.post(
+        "https://content.kpdcl.net:8085/file/fileSystem",
+        formData
+      );
+      let dataSplit = res.data.split("/");
+      let fileName = dataSplit[4].split(" type")[0].split(" ").join("%20");
+      let filePath =
+        "/" + dataSplit[1] + "/" + dataSplit[2] + "/" + dataSplit[3] + "/";
+      let folderURL = await checkInDoc(fileName, filePath, applicationID);
+      return folderURL;
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const checkInDoc = async (fileName, filePath, caseId) => {
+    try {
+      let username = await localStorage.getItem("username");
+      const url = `https://content.kpdcl.net/WCCService/resources/wccgeneric/checkin?fileName=${fileName}&filePath=/u01/oracle/docs/&consumerName=${caseId}_&serviceName=NewConnLoadApproval&dDocType=Domicile`;
+      const res = await axios.get(url);
+      console.log("checkin:", res.data);
+      if (res.data.status === "success") {
+      } else {
+        alert("Unable to upload file.");
+      }
+      return res.data.folderURL;
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      let folderURL = await uploadFile();
+      const response = await axios.post(
+        "https://kpdclcrm.kpdcl.net:8089/payment_status_update",
+        {
+          case_id: applicationID,
+          payment_status: folderURL?1:0,
+          receipt_url: folderURL,
+        }
+      );
+      console.log("RESPONSE:", response.data);
+      alert('Payment document uploaded successfully.')
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-blue-50">
-       {/* <div className="flex-auto justify-start">
+      {/* <div className="flex-auto justify-start">
           <img
             className=" -mt-2"
             src={require("./assets/logo.png")}
@@ -36,26 +127,17 @@ const PaymentUpload = () => {
           <div className="flex gap-2 max-md:flex-col">
             <div className="flex flex-col w-6/12  max-md:w-full">
               <div className="flex flex-col grow  text-lg font-semibold text-gray-700 max-md:mt-3">
-                <label className=" text-base">Applicant ID</label>
-                <input
-                  type="text"
-                  className="w-full mt-1 h-10 text-base p-2 bg-white rounded-lg border border-gray-300"
-                />
+                <label className=" text-base">Application ID</label>
+                <p className="border-2 p-2 rounded-md">{applicationID}</p>
               </div>
             </div>
 
-            <div className="flex flex-col w-6/12 max-md:ml-0 max-md:w-full">
+            <div className="flex flex-col w-6/12  max-md:w-full">
               <div className="flex flex-col grow  text-lg font-semibold text-gray-700 max-md:mt-3">
                 <label className=" text-base">Payment due</label>
-                <div className="relative w-full">
-                  <span className="absolute inset-y-0 left-0 p-2 flex items-center pl-3 text-blue-500">
-                    ₹
-                  </span>
-                  <input
-                    type="number"
-                    className="w-full pl-8 mt-1 h-10 p-2 bg-white rounded-lg border border-gray-300"
-                  />
-                </div>
+                  <p className="text-blue-500 border-2 rounded-md p-2">
+                    ₹{amount}
+                  </p>
               </div>
             </div>
           </div>
@@ -83,18 +165,21 @@ const PaymentUpload = () => {
                 <div className="w-full mt-1 text-base p-2 bg-white rounded-lg border border-gray-300">
                   <input
                     type="file"
-                    accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+                    accept="image/png, image/jpeg,image/jpg, application/pdf"
                     className="w-full h-10 p-2"
+                    onChange={handleFileUpload}
                   />
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <button className="self-center px-8 py-2 mt-8 w-56 max-w-full text-lg font-semibold text-white whitespace-nowrap bg-violet-500 rounded-full shadow-sm max-md:px-3 max-md:mt-6">
-  SUBMIT
-</button>
-
+        <button
+          className="self-center px-8 py-2 mt-8 w-56 max-w-full text-lg font-semibold text-white whitespace-nowrap bg-violet-500 rounded-full shadow-sm max-md:px-3 max-md:mt-6"
+          onClick={handleSubmit}
+        >
+          SUBMIT
+        </button>
       </div>
     </div>
   );
