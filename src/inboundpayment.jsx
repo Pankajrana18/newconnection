@@ -53,10 +53,7 @@ const PaymentUpload = ({ amount, applicationID }) => {
 
   const uploadFile = async () => {
     try {
-      if (!file) {
-        alert("File upload is mandatory!");
-        return;
-      }
+     
       const formData = new FormData();
 
       formData.append("file", file, file.name);
@@ -93,6 +90,10 @@ const PaymentUpload = ({ amount, applicationID }) => {
 
   const handleSubmit = async () => {
     try {
+      if (!file) {
+        alert('file upload is mandatory');
+        return;
+      }
       let folderURL = await uploadFile();
       const response = await axios.post(
         "https://kpdclcrm.kpdcl.net:8089/payment_status_update",
@@ -102,10 +103,14 @@ const PaymentUpload = ({ amount, applicationID }) => {
           receipt_url: folderURL,
         }
       );
-      console.log("RESPONSE:", response.data);
       alert('Payment document uploaded successfully.')
     } catch (error) {
-      console.log(error.message);
+      if(error.response.data=='Case ID already exist'){
+        alert('Case ID already exist');
+      }else{
+        alert('Something went wrong');
+      }
+      
     }
   };
 
