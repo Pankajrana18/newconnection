@@ -107,6 +107,8 @@ const PaymentUpload = ({ amount, applicationID }) => {
     } catch (error) {
       if(error.response.data=='Case ID already exist'){
         alert('Case ID already exist');
+      }else if(error.response.data==='Case ID not found'){
+        alert('Case ID not found');        
       }else{
         alert('Something went wrong');
       }
