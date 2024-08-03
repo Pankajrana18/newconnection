@@ -117,16 +117,18 @@ const PaymentUpload = ({ amount, applicationID }) => {
   };
 
   return (
+    <div className="min-h-screen bg-blue-50">
+    <img
+    className=" p-1 h-14 "
+    src={require("./assets/logo.png")}
+    alt="Logo"
+  />
     <div className="flex flex-col items-center justify-center min-h-screen bg-blue-50">
-      {/* <div className="flex-auto justify-start">
-          <img
-            className=" -mt-2"
-            src={require("./assets/logo.png")}
-            style={{ height: "50px" }}
-            alt=""
-          />
-        </div> */}
-      <div className="flex flex-col self-center px-4 py-4 mt-4 w-full max-w-3xl bg-white rounded-lg border-1 border-gray-300 shadow-md max-md:px-3 max-md:mt-4 max-md:max-w-full">
+     
+  
+
+
+      <div className="flex flex-col self-center -mt-20 px-4 py-4 mt-4 w-full max-w-3xl bg-white rounded-lg border-1 border-gray-300 shadow-md max-md:px-3 max-md:mt-4 max-md:max-w-full">
         <div className="text-2xl font-bold p-3 -ml-3 text-gray-900  max-md:max-w-full">
           Payment Document Upload for New Connection
         </div>
@@ -182,12 +184,13 @@ const PaymentUpload = ({ amount, applicationID }) => {
           </div>
         </div>
         <button
-          className="self-center px-8 py-2 mt-8 w-56 max-w-full text-lg font-semibold text-white whitespace-nowrap bg-violet-500 rounded-full shadow-sm max-md:px-3 max-md:mt-6"
+          className="self-center px-8 py-2 mt-14 mb-3 w-56 max-w-full text-lg font-semibold text-white whitespace-nowrap bg-violet-500 rounded-full shadow-sm max-md:px-3 max-md:mt-6 hover:font-semibold transform hover:scale-105 transition-all duration-300 ease-in-out hover:shadow-xl"
           onClick={handleSubmit}
         >
           SUBMIT
         </button>
       </div>
+    </div>
     </div>
   );
 };
