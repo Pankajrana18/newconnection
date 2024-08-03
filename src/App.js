@@ -17,6 +17,7 @@ function App() {
         console.log("APPLICATION ID:", match[1]);
       }
 
+
       const amountMatch = urlParams.split("p=")[1];
       if (amountMatch) {
         setAmount(amountMatch);

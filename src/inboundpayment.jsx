@@ -109,7 +109,7 @@ const PaymentUpload = ({ amount, applicationID }) => {
         alert('Case ID already exist');
       }else if(error.response.data==='Case ID not found'){
         alert('Case ID not found');        
-      }else{
+      }else{zs
         alert('Something went wrong');
       }
       
